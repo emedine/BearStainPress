@@ -30,7 +30,7 @@ export class Books extends Component {
 
    render() {
 
-      console.log(" we have books" + this.state);
+      console.log(" we have books" + JSON.stringify(this.state));
 
        return (
 
