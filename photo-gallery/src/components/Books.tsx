@@ -7,7 +7,9 @@ interface Book {
     title: {
       rendered: string;
     };
-    featured_media:{
+    featured_media?: string;
+
+    imageurl:{
         rendered: string;
     };
     content:{
@@ -24,57 +26,70 @@ interface Book {
     isLoaded: boolean;
   }
 
-export class Books extends Component<{}, BooksState> {
+  interface BookWithImage extends Book {
+    imageUrl?: string;
+  }
+  
 
-    state: BooksState = {
-        books: [],
-        isLoaded: false
-      };
+export class Books extends Component {
+  state = {
+    books: [] as BookWithImage[],
+    isLoaded: false
+  };
 
-      componentDidMount() {
-        axios
-          .get<Book[]>('https://bearstainpress.com/wp-json/wp/v2/books')
-          .then(res =>
+  componentDidMount() {
+    axios
+      .get('https://bearstainpress.com/wp-json/wp/v2/books')
+      .then(res => {
+        const bookPromises = res.data.map((book: Book) => {
+            if (book.featured_media) {
+                return axios.get(`https://bearstainpress.com/wp-json/wp/v2/media/${book.featured_media}`);
+              } else {
+                return Promise.resolve(null);
+              }
+        });
+
+        Promise.all(bookPromises)
+          .then(mediaResponses => {
+            const booksWithImages = res.data.map((book: Book, index: number) => ({
+              ...book,
+              imageUrl: mediaResponses[index] ? mediaResponses[index].data.guid.rendered : null
+            }));
+
             this.setState({
-              books: res.data,
+              books: booksWithImages,
               isLoaded: true
-            })
-          )
+            });
+          })
           .catch(err => console.log(err));
-      }
-    
-      render() {
-        console.log("book data: " + JSON.stringify(this.state));
+      })
+      .catch(err => console.log(err));
+  }
 
-        const { books, isLoaded } = this.state;
-        return (
-            
-          <div>
-            
-            {isLoaded ? (
-              books.map(book => (
-                <div key={book.id}>
-                  <h4>{book.title.rendered}</h4>
-                  {/* Render other book properties here */}
-                  
-                  console.log("ABOUT: " + book.excerpt);
+  render() {
+    const { books, isLoaded } = this.state;
 
-                  {book.featured_media && ( // Check if featured_media exists
+    return (
+      <div>
+        {isLoaded ? (
+          books.map(book => (
+            <div key={book.id}>
+              <h4>{book.title.rendered}</h4>
+              {book.imageUrl && (
                 <img
-                  src={`https://bearstainpress.com/wp-json/wp/v2/media/${book.featured_media}`}
+                  src={book.imageUrl}
                   alt="Featured Image"
                 />
               )}
+              <p>{book.content.rendered}</p>
+            </div>
+          ))
+        ) : (
+          <div>Loading...</div>
+        )}
+      </div>
+    );
+  }
+}
 
-                </div>
-              ))
-            ) : (
-              <div>Loading...</div>
-            )}
-          </div>
-
-        );
-      }
-    }
-    
-    export default Books;
+export default Books;
