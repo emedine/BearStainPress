@@ -24,13 +24,13 @@ const Tab2: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Archive</IonTitle>
+          <IonTitle>Gallery</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">BookShop</IonTitle>
+            <IonTitle size="large">Gallery</IonTitle>
           </IonToolbar>
         </IonHeader>
         <ExploreContainer name="BookShop" />

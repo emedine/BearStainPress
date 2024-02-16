@@ -7,6 +7,15 @@ interface Book {
     title: {
       rendered: string;
     };
+    featured_media:{
+        rendered: string;
+    };
+    content:{
+        rendered: string;
+      };
+    excerpt:{
+        rendered: string;
+      };
     // Add other properties as needed
   }
 
@@ -35,23 +44,35 @@ export class Books extends Component<{}, BooksState> {
       }
     
       render() {
+        console.log("book data: " + JSON.stringify(this.state));
+
         const { books, isLoaded } = this.state;
-    
         return (
+            
           <div>
+            
             {isLoaded ? (
               books.map(book => (
                 <div key={book.id}>
                   <h4>{book.title.rendered}</h4>
                   {/* Render other book properties here */}
+                  
+                  console.log("ABOUT: " + book.excerpt);
 
-                  console.log("I am a book: " + book.title)
+                  {book.featured_media && ( // Check if featured_media exists
+                <img
+                  src={`https://bearstainpress.com/wp-json/wp/v2/media/${book.featured_media}`}
+                  alt="Featured Image"
+                />
+              )}
+
                 </div>
               ))
             ) : (
               <div>Loading...</div>
             )}
           </div>
+
         );
       }
     }
