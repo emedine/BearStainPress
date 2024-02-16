@@ -2,47 +2,58 @@ import React, { Component } from 'react'
 
 import axios from 'axios';
 
-export class Books extends Component {
+interface Book {
+    id: number;
+    title: {
+      rendered: string;
+    };
+    // Add other properties as needed
+  }
 
-   state = {
+  interface BooksState {
+    books: Book[];
+    isLoaded: boolean;
+  }
 
-       books: [],
+export class Books extends Component<{}, BooksState> {
 
-       isLoaded: false
+    state: BooksState = {
+        books: [],
+        isLoaded: false
+      };
 
-   }
+      componentDidMount() {
+        axios
+          .get<Book[]>('https://bearstainpress.com/wp-json/wp/v2/books')
+          .then(res =>
+            this.setState({
+              books: res.data,
+              isLoaded: true
+            })
+          )
+          .catch(err => console.log(err));
+      }
+    
+      render() {
+        const { books, isLoaded } = this.state;
+    
+        return (
+          <div>
+            {isLoaded ? (
+              books.map(book => (
+                <div key={book.id}>
+                  <h4>{book.title.rendered}</h4>
+                  {/* Render other book properties here */}
 
- componentDidMount () {
-
-   axios.get('https://bearstainpress.com/wp-json/wp/v2/books')
-
-       .then(res => this.setState({
-
-           books: res.data,
-
-           isLoaded: true
-
-       }))
-
-       .catch(err => console.log(err))
-
-   }
-
-   render() {
-
-      console.log(" we have books" + JSON.stringify(this.state));
-
-       return (
-
-           <div>
-
-              
-
-           </div>
-
-       )
-
-   }
-
-}
-export default Books;
+                  console.log("I am a book: " + book.title)
+                </div>
+              ))
+            ) : (
+              <div>Loading...</div>
+            )}
+          </div>
+        );
+      }
+    }
+    
+    export default Books;
