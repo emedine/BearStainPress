@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 
 import axios from 'axios';
 
+// Define the base URL
+const BASE_URL = 'https://bearstainpress.com/wp-json/wp/v2';
+
 interface Book {
     id: number;
     title: {
@@ -39,11 +42,11 @@ export class Books extends Component {
 
   componentDidMount() {
     axios
-      .get('https://bearstainpress.com/wp-json/wp/v2/books')
+    .get(`${BASE_URL}/books`)
       .then(res => {
         const bookPromises = res.data.map((book: Book) => {
             if (book.featured_media) {
-                return axios.get(`https://bearstainpress.com/wp-json/wp/v2/media/${book.featured_media}`);
+                return axios.get(`${BASE_URL}/media/${book.featured_media}`);
               } else {
                 return Promise.resolve(null);
               }
